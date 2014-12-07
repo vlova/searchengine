@@ -1,7 +1,6 @@
 (ns searchengine.site.core
   (:require
    [org.httpkit.server :as httpkit :refer :all]
-   [ring.middleware.file-info :refer [wrap-file-info]]
    [ring.middleware.edn :refer [wrap-edn-params]]
    [compojure.handler :refer [site]]
    [searchengine.site.routes :refer [app-routes]]

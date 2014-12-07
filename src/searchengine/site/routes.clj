@@ -5,11 +5,8 @@
     [route :refer [files resources not-found]]
     [handler :refer [site]]
     [route :refer [not-found]])
+   [ring.util.response :refer [file-response]]
    [searchengine.model.pages :as pages]))
-
-(defn main-page []
-  "hi")
-
 
 (defn generate-response [data & [status]]
   {:status (or status 200)
@@ -17,8 +14,9 @@
    :body (pr-str data)})
 
 (defroutes app-routes
-  (GET "/" [] (main-page))
-  (GET "/search" [q from count] (generate-response (pages/query q from count)))
-  (GET "/crawl" [link] link)
+  (GET "/" [] (file-response "index.html" {:root "static"}))
+  (GET "/search" [q from count]
+       (generate-response
+        (pages/query q from count)))
   (files "" {:root "static"})
   (not-found "<p>Page not found.</p>"))
