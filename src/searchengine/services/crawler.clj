@@ -24,17 +24,16 @@
         :content (extract-content body)})
       nil)))
 
-(defn start-crawler []
-  (wrap-with-rabbitmq
+(defn- link-received [channel metadata ^bytes payload]
+  (wrap-with-elastic
    (fn []
-     (rabbitmq/subscribe
-      (fn [channel metadata ^bytes payload]
-        (wrap-with-elastic
-         (fn []
-           (wrap-with-rabbitmq
-            (fn []
-              (try
-                (crawl (String. payload "UTF-8"))
-                (catch Throwable ex
-                  (println ex))))))))))
-   false))
+     (wrap-with-rabbitmq
+      (fn []
+        (try
+          (crawl (String. payload "UTF-8"))
+          (catch Throwable ex
+            (println ex))))))))
+
+(defn start-crawler []
+  (wrap-with-rabbitmq (fn [] (rabbitmq/subscribe link-received))
+                      false))
