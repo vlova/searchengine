@@ -14,12 +14,14 @@
   (with-resources
     [[rabbitmq-connection
       (rabbitmq/connect)
-      (when (and (not= close? false) (rabbitmq/open? $))
+      (when (and close?
+                 (rabbitmq/open? $))
         (rabbitmq/close $))
       $]
      [rabbitmq-channel
       (channel/open @rabbitmq-connection)
-      (when (and (not= close? false) (channel/open? $))
+      (when (and close?
+                 (channel/open? $))
         (channel/close $))
       $]]
     (fn)))

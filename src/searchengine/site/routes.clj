@@ -6,7 +6,10 @@
     [handler :refer [site]]
     [route :refer [not-found]])
    [ring.util.response :refer [file-response]]
-   [searchengine.model.pages :as pages]))
+   [searchengine.model.pages :as pages])
+  (:import
+   (org.apache.commons.lang3
+    StringEscapeUtils)))
 
 (defn generate-response [data & [status]]
   {:status (or status 200)
@@ -17,6 +20,6 @@
   (GET "/" [] (file-response "index.html" {:root "static"}))
   (GET "/search" [q from count]
        (generate-response
-        (pages/query q from count)))
+        (pages/query (StringEscapeUtils/unescapeHtml4 q) from count)))
   (files "" {:root "static"})
   (not-found "<p>Page not found.</p>"))

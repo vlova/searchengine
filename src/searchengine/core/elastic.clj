@@ -28,18 +28,17 @@
 
     :properties
     {:uri {:type :string :store :yes}
+     :title {:type :string :store :yes}
      :content {:type :string :store :yes :analyzer :page-analyzer}
-     :last-updated {:type :date :format "basic_date_time_no_millis"}
      }}})
 
-(hook-arguments []
- (defn initialize-elastic []
-  (when (index/exists?)
-    (index/delete))
-  (when (not (index/exists?))
-    (index/create
+(defn initialize-elastic []
+  (when (index/exists? @elastic-connection "nuresearch")
+    (index/delete @elastic-connection "nuresearch"))
+  (when (not (index/exists? @elastic-connection "nuresearch"))
+    (index/create @elastic-connection "nuresearch"
      :settings settings
-     :mappings mapping-types))))
+     :mappings mapping-types)))
 
 
 (defn wrap-with-elastic [fn]

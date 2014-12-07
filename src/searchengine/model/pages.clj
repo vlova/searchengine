@@ -18,7 +18,8 @@
    @elastic-connection "nuresearch" "page"
    :from from
    :size size
-   :query {:query_string { :query query }}
+   :query {:query_string {:fields ["content", "uri", "title.*^5"]
+                          :query query }}
    :highlight {:order :score
                :fields
                {:content

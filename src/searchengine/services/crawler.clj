@@ -1,5 +1,6 @@
 (ns searchengine.services.crawler
   (:require
+   [clojure.string :as string]
    [clj-http.client :as http]
    [searchengine.model.pages :as pages]
    [searchengine.core.elastic :as elastic :refer [wrap-with-elastic]]
@@ -21,7 +22,9 @@
           (rabbitmq/publish link)))
       (pages/index
        {:uri uri
-        :content (extract-content body)})
+        :content (extract-content body)
+        :title (let [title (extract-title body)]
+                 (if-not (string/blank? title) title uri))})
       nil)))
 
 (defn- link-received [channel metadata ^bytes payload]
@@ -35,5 +38,6 @@
             (println ex))))))))
 
 (defn start-crawler []
-  (wrap-with-rabbitmq (fn [] (rabbitmq/subscribe link-received))
-                      false))
+  (wrap-with-rabbitmq
+   (fn [] (rabbitmq/subscribe link-received))
+   false))

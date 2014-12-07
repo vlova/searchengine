@@ -18,12 +18,13 @@
                  [clojurewerkz/elastisch "2.1.0-rc1"]
                  [clj-http "1.0.1"]
                  [hickory "0.5.4"]
+                 [org.apache.commons/commons-lang3 "3.3.2"]
                  [com.novemberain/langohr "3.0.0-rc4"]]
   :plugins [[hiccup-bridge "1.0.1"]
             [lein-swank "1.4.5"]
             [lein-cljsbuild "1.0.3"]]
-  :main searchengine.core
-  :aot :all
+;;   :main searchengine.core
+;;   :aot :all
   :cljsbuild
   {
    :builds [{:source-paths ["src-cljs"]

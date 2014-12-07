@@ -47,14 +47,15 @@
 
 (defn hit->result [hit]
   (let [{:keys [_source highlight]} hit
-        uri (:uri _source)
+        {:keys [uri title]} _source
+        {:keys [content]} highlight
         content (as->
-                 (:content highlight) $
+                 content $
                  (apply str $)
                  (string/replace $ "&lt;" "<")
                  (string/replace $ "&gt;" ">"))]
     {:uri uri
-     :title uri
+     :title title
      :content content}))
 
 (defn update-search-results [results]
@@ -92,11 +93,12 @@
     (swap! app-state assoc :page page)
     (search)))
 
+
 (defn pagination [data]
   (let [total (int (?? (:search-total data) 0))
         current-page (:page data)
         pages-total (int (/ (+ total (dec results-count)) results-count))]
-    (when (not (zero? total))
+    (when (> pages-total 1)
       (html
        [:p (str "Пагинация: ")
         (let [pages (as->
@@ -104,8 +106,7 @@
                      (drop (max 0 (- current-page 5)) $)
                      (take 10 $))]
           [:span
-           (if (not (= (first pages) 1))
-             "... ")
+           (if (not (= (first pages) 1)) "... ")
            (for [page pages]
              [:span
               [:a {:href "#"
@@ -113,8 +114,7 @@
                    :data-page page
                    :onClick handle-page-change} page]
               " "])
-           (if (not (= (last pages) (dec pages-total)))
-             " ...")])]))))
+           (if (not (= (last pages) (dec pages-total))) " ...")])]))))
 
 (defn widget [data]
   (om/component
@@ -138,4 +138,3 @@
          app-state
          {:target js/document.body})
 
-app-state

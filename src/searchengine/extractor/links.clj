@@ -6,7 +6,8 @@
 
 (defn- valid? [link]
   "checks whether the link is valid and can be crawled"
-  (let [startsWith #(.startsWith link %)
+  (let [link (str/lower-case link)
+        startsWith #(.startsWith link %)
         endsWith #(.endsWith link %)]
     (and (or (startsWith "http://nure.ua")
              (startsWith "https://nure.ua"))
