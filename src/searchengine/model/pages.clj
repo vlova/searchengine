@@ -20,13 +20,11 @@
    :size size
    :query {:query_string { :query query }}
    :highlight {:order :score
-               :fields {:content {:type :plain
-                                  :fragment_size 300
-                                  :number_of_fragments 1
-                                  :pre_tags  ["&lt;b&gt;"]
-                                  :post_tags  ["&lt;/b&gt;"]}}
+               :fields
+               {:content
+                {:type :plain
+                 :fragment_size 300
+                 :number_of_fragments 1
+                 :pre_tags  ["&lt;b&gt;"]
+                 :post_tags  ["&lt;/b&gt;"]}}
                }))
-
-(defn query-count [string]
-  (document/count @elastic-connection "nuresearch" "page"
-                  :query {:query_string { :query string }}))

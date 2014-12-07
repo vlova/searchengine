@@ -16,7 +16,8 @@
          (not (endsWith ".gif"))
          (not (endsWith ".mp3"))
          (not (endsWith ".doc"))
-         (not (endsWith ".pdf")))))
+         (not (endsWith ".pdf"))
+         (not (endsWith ".zip")))))
 
 (defn- filter-links [node]
   "finds valid links in the html node"
