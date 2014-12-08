@@ -10,7 +10,7 @@
    [goog.net XhrIo EventType]
    [goog.events EventType]))
 
-(def results-count 2)
+(def results-count 10)
 
 (defn ?? [a b] (if (nil? a) b a))
 
@@ -90,11 +90,11 @@
 (defn render-search-control [{:keys [query]}]
   (html
    [:div {:class "search-control"}
-     [:p {:class "search-header"} "Find it!"]
-     [:input {:type "text"
-              :value query
-              :placeholder "что бы вы хотели найти?"
-              :onChange handle-query-change}]]))
+    [:p {:class "search-header"} "Find it!"]
+    [:input {:type "text"
+             :value query
+             :placeholder "что бы вы хотели найти?"
+             :onChange handle-query-change}]]))
 
 (defn render-pagination-page [page current-page]
   (html [:span
@@ -122,11 +122,11 @@
            (if (not (= (first pages) 1))
              [:span
               (render-pagination-page 1 current-page)
-              " … "])
+              (when (not (= (first pages) 2)) " … ")])
            (for [page pages]
              (render-pagination-page page current-page))
            (if (not (= (last pages) pages-total))
-             [:span " … "
+             [:span (when (not (= (last pages) (dec pages-total))) " … ")
               (render-pagination-page pages-total current-page)
               ])])]))))
 
