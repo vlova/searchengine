@@ -30,5 +30,6 @@
    :builds [{:source-paths ["src-cljs"]
              :compiler {:output-to "static/main.js"
                         :optimizations :advanced
+                        :warnings false
                         :externs ["static/react-0.11.2-min.js"]
                         :pretty-print false}}]})

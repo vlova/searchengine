@@ -61,9 +61,9 @@
         page (:page @app-state)
         from (* (dec page) results-count)]
     (edn-xhr
-     {:method :get
-      :url (str "/search?q=" query "&from=" from "&count=" results-count)
-      :data {}
+     {:method :post
+      :url "/search"
+      :data {:q query :from from :count results-count}
       :on-complete
       (fn [res]
         (when (= current-no @search-result-no)

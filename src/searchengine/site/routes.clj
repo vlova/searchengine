@@ -18,7 +18,7 @@
 
 (defroutes app-routes
   (GET "/" [] (file-response "index.html" {:root "static"}))
-  (GET "/search" [q from count]
+  (POST "/search" [q from count]
        (generate-response
         (pages/query (StringEscapeUtils/unescapeHtml4 q) from count)))
   (files "" {:root "static"})
