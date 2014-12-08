@@ -21,7 +21,6 @@
     (events/listen xhr goog.net.EventType.COMPLETE (fn [e] (on-complete (reader/read-string (.getResponseText xhr)))))
     (. xhr (send url (meths method) (when data (pr-str data)) #js {"Content-Type" "application/edn"}))))
 
-
 (defonce search-result-no (atom 0))
 
 (defonce app-state
@@ -32,23 +31,29 @@
     :page 1
     :search-results []}))
 
+(defn update-in-state [key value]
+  (swap! app-state assoc key value))
+
+(defn fix-content-highlight [content]
+  (as->
+   content $
+   (apply str $)
+   (string/replace $ "&lt;" "<")
+   (string/replace $ "&gt;" ">")))
+
 (defn hit->result [hit]
   (let [{:keys [_source highlight]} hit
         {:keys [uri title]} _source
         {:keys [content]} highlight
-        content (as->
-                 content $
-                 (apply str $)
-                 (string/replace $ "&lt;" "<")
-                 (string/replace $ "&gt;" ">"))]
+        content (fix-content-highlight content)]
     {:uri uri
      :title title
      :content content}))
 
 (defn update-search-results [results]
   (let [{:keys [hits, total]} (:hits results)]
-    (swap! app-state assoc :search-results (vec (map hit->result hits)))
-    (swap! app-state assoc :search-total (?? total 0))))
+    (update-in-state :search-results (vec (map hit->result hits)))
+    (update-in-state :search-total (?? total 0))))
 
 (defn get-search-results [query]
   (swap! search-result-no inc)
@@ -62,24 +67,24 @@
       :on-complete
       (fn [res]
         (when (= current-no @search-result-no)
-          (swap! app-state assoc :state :none)
+          (update-in-state :state :none)
           (update-search-results res)))
           })))
 
 (defn search []
-  (swap! app-state assoc :state :searching)
+  (update-in-state :state :searching)
   (update-search-results [])
   (get-search-results (:query @app-state)))
 
 (defn handle-query-change [e]
   (let [query (.. e -target -value)]
-    (swap! app-state assoc :query query)
-    (swap! app-state assoc :page 1)
+    (update-in-state :query query)
+    (update-in-state :page 1)
     (search)))
 
 (defn handle-page-change [e]
   (let [page (int (.. e -target (getAttribute "data-page")))]
-    (swap! app-state assoc :page page)
+    (update-in-state :page page)
     (search)))
 
 (defn render-search-control [{:keys [query]}]
