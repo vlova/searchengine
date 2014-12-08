@@ -4,6 +4,8 @@
    [hickory.select :as hs]
    [clojure.string :as str]))
 
+(def badExtensions [".jpg" ".jpeg" ".png" ".bmp" ".gif" ".mp3" ".doc" ".pdf" ".zip" ".jsp"])
+
 (defn- valid? [link]
   "checks whether the link is valid and can be crawled"
   (let [link (str/lower-case link)
@@ -11,14 +13,7 @@
         endsWith #(.endsWith link %)]
     (and (or (startsWith "http://nure.ua")
              (startsWith "https://nure.ua"))
-         (not (endsWith ".jpg"))
-         (not (endsWith ".png"))
-         (not (endsWith ".bmp"))
-         (not (endsWith ".gif"))
-         (not (endsWith ".mp3"))
-         (not (endsWith ".doc"))
-         (not (endsWith ".pdf"))
-         (not (endsWith ".zip")))))
+         (empty? (filter (fn [ext] (endsWith ext)) badExtensions)))))
 
 (defn- filter-links [node]
   "finds valid links in the html node"
