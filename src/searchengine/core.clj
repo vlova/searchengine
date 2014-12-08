@@ -24,4 +24,4 @@
     (site/run port)
     (info "server started, visit http://localhost:" port "/")))
 
-(-main)
+;; (-main)

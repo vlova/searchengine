@@ -10,29 +10,16 @@
    [goog.net XhrIo EventType]
    [goog.events EventType]))
 
-(enable-console-print!)
+(def results-count 2)
 
-(def results-count 10)
+(defn ?? [a b] (if (nil? a) b a))
 
-(defn ?? [a b]
-  (if (nil? a) b a))
-
-(def ^:private meths
-  {:get "GET"
-   :put "PUT"
-   :post "POST"
-   :delete "DELETE"})
+(def ^:private meths {:get "GET" :put "PUT" :post "POST" :delete "DELETE"})
 
 (defn edn-xhr [{:keys [method url data on-complete]}]
   (let [xhr (XhrIo.)]
-    (events/listen xhr goog.net.EventType.COMPLETE
-                   (fn [e]
-                     (on-complete (reader/read-string (.getResponseText xhr)))))
-    (. xhr
-       (send url
-             (meths method)
-             (when data (pr-str data))
-             #js {"Content-Type" "application/edn"}))))
+    (events/listen xhr goog.net.EventType.COMPLETE (fn [e] (on-complete (reader/read-string (.getResponseText xhr)))))
+    (. xhr (send url (meths method) (when data (pr-str data)) #js {"Content-Type" "application/edn"}))))
 
 
 (defonce search-result-no (atom 0))
@@ -40,10 +27,10 @@
 (defonce app-state
   (atom
    {:query ""
+    :state :none
     :search-total 0
     :page 1
-    :search-results
-    []}))
+    :search-results []}))
 
 (defn hit->result [hit]
   (let [{:keys [_source highlight]} hit
@@ -75,10 +62,12 @@
       :on-complete
       (fn [res]
         (when (= current-no @search-result-no)
+          (swap! app-state assoc :state :none)
           (update-search-results res)))
           })))
 
 (defn search []
+  (swap! app-state assoc :state :searching)
   (update-search-results [])
   (get-search-results (:query @app-state)))
 
@@ -93,46 +82,77 @@
     (swap! app-state assoc :page page)
     (search)))
 
+(defn render-search-control [{:keys [query]}]
+  (html
+   [:div {:class "search-control"}
+     [:p {:class "search-header"} "Find it!"]
+     [:input {:type "text"
+              :value query
+              :placeholder "что бы вы хотели найти?"
+              :onChange handle-query-change}]]))
 
-(defn pagination [data]
+(defn render-pagination-page [page current-page]
+  (html [:span
+         (if (= page current-page)
+           [:a {:class "disabled"
+                :data-page page
+                :onClick (fn [e] false)} page]
+           [:a {:href "#"
+                :data-page page
+                :onClick handle-page-change} page])
+         " "]))
+
+(defn render-pagination [data]
   (let [total (int (?? (:search-total data) 0))
         current-page (:page data)
         pages-total (int (/ (+ total (dec results-count)) results-count))]
     (when (> pages-total 1)
       (html
-       [:p (str "Пагинация: ")
+       [:p {:class "pagination"}
         (let [pages (as->
-                     (range 1 pages-total) $
+                     (range 1 (inc pages-total)) $
                      (drop (max 0 (- current-page 5)) $)
                      (take 10 $))]
           [:span
-           (if (not (= (first pages) 1)) "... ")
-           (for [page pages]
+           (if (not (= (first pages) 1))
              [:span
-              [:a {:href "#"
-                   :class "disabled"
-                   :data-page page
-                   :onClick handle-page-change} page]
-              " "])
-           (if (not (= (last pages) (dec pages-total))) " ...")])]))))
+              (render-pagination-page 1 current-page)
+              " … "])
+           (for [page pages]
+             (render-pagination-page page current-page))
+           (if (not (= (last pages) pages-total))
+             [:span " … "
+              (render-pagination-page pages-total current-page)
+              ])])]))))
+
+(defn render-search-results [{:keys [search-results search-total query page]}]
+  (html
+   (when (not (string/blank? query))
+     [:div
+      [:div.search-total (str "(всего найдено: " search-total ")")]
+      (when (seq search-results)
+        [:div#results
+         (for [{:keys [uri title content index]}
+               (map-indexed #(merge %2 {:index (+ 1 (* results-count (dec page)) %1)}) search-results)]
+           [:div.search-result
+            [:h5 [:a {:href uri} index ". "  title]]
+            (om.dom/span
+             #js {:dangerouslySetInnerHTML #js {:__html content :className "content"}
+                  :className "content"}
+             )])])
+      ])))
 
 (defn widget [data]
   (om/component
-   (html [:div
-          "Поиск: "
-          [:input {:type "text" :value (:query data) :onChange handle-query-change}]
-          [:h4 "Результаты"]
-          [:p (str "Всего найдено: " (:search-total data))]
-          (pagination data)
-          (let [search-results (:search-results data)]
-            (when (seq search-results)
-              [:div#results
-               (for [{:keys [uri title content index]}
-                     (map-indexed #(merge %2 {:index (inc %1)}) search-results)]
-                 [:div.result
-                  [:h5 index ". " [:a {:href uri} title]]
-                  (om.dom/div #js {:dangerouslySetInnerHTML #js {:__html content }})])])
-            )])))
+   (html [:div {:class "container"}
+          (render-search-control data)
+          (if (= (:state data) :searching)
+            [:div.waiting [:img {:src "/ajax-loader.gif"}]]
+            [:div
+             (render-pagination data)
+             (render-search-results data)
+             (render-pagination data)])
+          ])))
 
 (om/root widget
          app-state

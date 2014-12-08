@@ -1,4 +1,4 @@
-(ns searchengine.site.core
+(
   (:require
    [org.httpkit.server :as httpkit :refer :all]
    [ring.middleware.edn :refer [wrap-edn-params]]
@@ -9,7 +9,6 @@
     [elastic :refer [wrap-with-elastic]]
     [rabbitmq :refer [wrap-with-rabbitmq]])))
 
-
 (defn run [port]
   (run-server
    (-> #'app-routes
@@ -18,3 +17,5 @@
        ((to-middleware wrap-with-elastic))
        ((to-middleware wrap-with-rabbitmq)))
    {:port port}))
+
+

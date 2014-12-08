@@ -37,4 +37,5 @@
    (hc/as-hickory $)
    (filter-links $)
    (map (comp :href :attrs ) $)
+   (map str/lower-case $)
    ))
