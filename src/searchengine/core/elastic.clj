@@ -33,8 +33,8 @@
      }}})
 
 (defn initialize-elastic []
-  (when (index/exists? @elastic-connection "nuresearch")
-    (index/delete @elastic-connection "nuresearch"))
+  ;; (when (index/exists? @elastic-connection "nuresearch")
+  ;;  (index/delete @elastic-connection "nuresearch"))
   (when (not (index/exists? @elastic-connection "nuresearch"))
     (index/create @elastic-connection "nuresearch"
      :settings settings
