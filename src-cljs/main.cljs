@@ -91,6 +91,7 @@
   (html
    [:div {:class "search-control"}
     [:img {:src "/logoFindIt.png" :class "search-header"}]
+    [:br]
     [:input {:type "text"
              :value query
              :placeholder "What would you like to find?"
