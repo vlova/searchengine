@@ -90,10 +90,10 @@
 (defn render-search-control [{:keys [query]}]
   (html
    [:div {:class "search-control"}
-    [:p {:class "search-header"} "Find it!"]
+    [:img {:src "/logoFindIt.png" :class "search-header"}]
     [:input {:type "text"
              :value query
-             :placeholder "что бы вы хотели найти?"
+             :placeholder "What would you like to find?"
              :onChange handle-query-change}]]))
 
 (defn render-pagination-page [page current-page]
