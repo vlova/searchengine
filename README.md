@@ -1,14 +1,12 @@
-# dlsearch
+# nuresearch
 
-A Clojure library designed to ... well, that part is up to you.
+This is simple stupid search engine. 
 
-## Usage
+## purpose
 
-FIXME
+Learn how to develop single page applications on clojure/clojurescript
 
-## License
+## used techonologies
 
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Rabbitmq as queue
+ElasticSearch as primary data store and search engine
